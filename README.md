@@ -49,10 +49,12 @@ The graph is configured to periodically request updated measurement data.
 
 The repository contains:
 
+- A demonstration login page.
 - A home page.
 - A sensor measurement graph.
 - Navigation between application pages.
 
+**Note:** The existing login is a demonstration and does not provide production-ready authentication or access control.
 
 ## 3. Technology Stack
 
@@ -411,11 +413,11 @@ Screenshots should represent actual application output rather than mockups prese
 
 ## 13. Project Background
 
-PiPlot was originally developed by me during my student years.
+## Project Background
 
-The repository preserves the original implementation and its development history.
+I originally created PiPlot during my student years in 2017 as a personal software project. I developed and used the application to explore Raspberry Pi sensor measurements, Java backend development, and live data visualization in a web browser.
 
-I plan to continue developing and maintaining the application independently, focusing on reliability, usability, modernization, and testing.
+I have kept the original implementation and development history and intend to continue improving the project independently. The planned improvements are separate from the features already present in the repository.
 
 ## 14. License
 
