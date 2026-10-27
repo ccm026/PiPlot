@@ -36,7 +36,7 @@
                 });
                 function crunchifyData() {
                     $.ajax({
-                        url : 'run.html',
+                        url : '${pageContext.request.contextPath}/run',
                         dataType : "json",
                         cache : false,
                         contentType : 'application/json; charset=utf-8',

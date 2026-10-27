@@ -8,16 +8,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 public class DistanceController {
+	
+	@Value("${piplot.simulation:false}")
+	private boolean simulationMode;
 
     private static GpioPinDigitalOutput sensorTriggerPin ;
     private static GpioPinDigitalInput sensorEchoPin ;
     private double Distance;
     private float d;
-
-    final static GpioController gpio = GpioFactory.getInstance();
 
     @RequestMapping(value = "/graph",method = RequestMethod.GET)
     public String graph(){
@@ -28,7 +30,27 @@ public class DistanceController {
     @RequestMapping(value = "/run", method = RequestMethod.GET)
     public @ResponseBody
     String run() throws JSONException {
-
+		if (simulationMode) {
+			// Generate simulated distance values in centimeters.
+			double value = 20.0 +
+					10.0 * Math.sin(System.currentTimeMillis() / 1000.0);
+			double simulatedDistance = Math.round(value * 100.0) / 100.0;
+			
+			JSONArray sample = new JSONArray();
+			sample.put(simulatedDistance);
+			
+			JSONArray result = new JSONArray();
+			result.put(sample);
+			
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put("measuredData", result);
+			
+			return jsonObj.toString();
+		}
+		
+		// Initialize real GPIO only when simulation is disabled.
+		GpioController gpio = GpioFactory.getInstance();
+		
         JSONObject distance = new JSONObject();
         JSONArray result = new JSONArray();
         JSONObject jsonObj = new JSONObject();
