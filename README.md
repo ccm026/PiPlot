@@ -200,9 +200,62 @@ This is a proposed roadmap for independent improvement; **none of these tasks sh
 
 Once a separate `ROADMAP.md` is added, development tasks can be tracked there and linked to GitHub Issues. The estimates represent possible future work, not hours already worked.
 
-## Screenshots and demonstration
+## Running PiPlot on Windows (Simulation Mode)
 
-Real screenshots of the running application will be added after the legacy setup has been reproduced. No example image is included here because the current functionality has not been independently demonstrated.
+PiPlot supports a simulation mode that allows the application to run on a Windows PC without Raspberry Pi hardware.
+
+This mode generates sample distance measurements and displays them through the existing web-based visualization.
+
+### Requirements
+
+- Java JDK 8
+- Apache Maven 3.9.x
+- Web browser
+
+### Configuration
+
+Open `src/main/resources/application.properties` and configure:
+
+```properties
+server.port=9192
+piplot.simulation=true
+```
+
+Setting `piplot.simulation=true` enables simulated measurements without initializing Raspberry Pi GPIO hardware.
+
+### Build and Start
+
+```bash
+mvn clean test
+mvn clean package
+mvn spring-boot:run
+```
+
+### Access the Application
+
+Open `http://localhost:9192/` in your browser.
+
+Log in using the predefined demonstration credentials documented in the Login section.
+
+After logging in, select **Start Measuring** to view the live graph.
+
+### Simulation API
+
+The measurement endpoint is available at:
+
+`http://localhost:9192/run`
+
+Example response:
+
+```json
+{
+  "measuredData": [[24.02]]
+}
+```
+
+The simulation generates changing distance values to demonstrate the application's data visualization functionality.
+
+**Note:** Simulation mode has been tested on Windows. Measurement acquisition using physical Raspberry Pi GPIO hardware still requires testing on compatible hardware.
 
 ## Project background
 
