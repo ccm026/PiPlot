@@ -53,7 +53,7 @@
                 var dataLength = 20; // number of dataPoints visible at any point
 
                 var updateChart = function (count) {
-                        yVal = parseInt(count);
+                        yVal = parseFloat(count[0][0]);
                         xVal = new Date();
                         dps.push({
                             x: xVal,
