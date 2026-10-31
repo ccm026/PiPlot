@@ -18,7 +18,7 @@ This roadmap records work **not yet completed**. Estimates are planning ranges, 
 - Replaced unavailable Pi4J `1.2-SNAPSHOT` with stable `1.2`.
 - Added configurable Windows simulation mode (`piplot.simulation=true`) that avoids native GPIO initialization during simulation.
 - Separated simulation and hardware measurement providers and introduced a 13-test Java regression suite; verified locally on Java 8.
-- Added Java 8 GitHub Actions workflow; CI success is not yet claimed until the remote run is green.
+- Added Java 8 GitHub Actions workflow; CI success is claimed and the remote run is green.
 - Demonstrated the existing login page, Home page, live graph, and `/run` JSON endpoint in a browser.
 - Corrected integer parsing in the graph in a later commit; further numerical/error-case validation remains useful.
 - Added screenshots of the working demonstration.
@@ -31,8 +31,8 @@ This roadmap records work **not yet completed**. Estimates are planning ranges, 
 | PP-02 | Separate measurement providers from web controllers | Completed (not counted) | High | Implemented; hardware unvalidated |
 | PP-03 | Improve plotting, polling, and API error handling | 4–6 h | High | Planned |
 | PP-04 | Expand automated regression tests | 3–5 h | High | 13 software-only tests added; more work planned |
-| PP-05 | Review and modernize legacy dependencies | 6–10 h | Medium | Planned |
-| PP-06 | Improve CI reliability and hardware documentation | 2–4 h | Medium | Workflow added, green CI run pending |
+| PP-05 | Review and modernize legacy dependenes | 6–10 h | Medium | Planned |
+| PP-06 | Improve hardware documentation | 2–4 h | Medium | Workflow added |
 | **Total** | **Estimated remaining work** | **21–34 h** | | |
 
 > **Planning caution:** Some tasks may overlap and estimates can change after investigation. Do not claim the full range as completed, and do not create artificial tasks merely to reach a target number of hours. The scope and actual work should remain genuine.
@@ -124,7 +124,7 @@ The chart demonstrates successful simulated updates, but frontend handling remai
 
 ### Problem
 
-A 13-test software-only suite now covers deterministic simulation values, provider selection, successful JSON responses, negative and invalid measurements, provider unavailability, and JSP view mapping. Remaining work includes more edge conditions and frontend/error regressions; a green GitHub CI run is also required.
+A 13-test software-only suite now covers deterministic simulation values, provider selection, successful JSON responses, negative and invalid measurements, provider unavailability, and JSP view mapping. Remaining work includes more edge conditions and frontend/error regressions.
 
 ### Planned work
 
@@ -166,7 +166,7 @@ The project uses Spring Boot 1.5.6 and manually pinned dependencies from differe
 - No untested claim is made that current Raspberry Pi hardware remains supported after changes.
 - If the full modernization exceeds the estimate, split remaining migration work into a separately scoped issue.
 
-## PP-06 — Add CI, reproducible setup, and hardware documentation
+## PP-06 — Add reproducible setup, and hardware documentation
 
 **Estimate:** 2–4 hours remaining  
 **Priority:** Medium  
@@ -174,7 +174,7 @@ The project uses Spring Boot 1.5.6 and manually pinned dependencies from differe
 
 ### Problem
 
-The application has a documented Windows simulation setup and an initial Java 8 GitHub Actions workflow, but CI needs a confirmed green run and broader reproducibility and hardware documentation remain future work.
+The application has a documented Windows simulation setup and an initial Java 8 GitHub Actions workflow, but CI needs broader reproducibility and hardware documentation remain future work.
 
 ### Planned work
 
