@@ -34,7 +34,7 @@ The application also includes a **Windows simulation mode**. This generates samp
 | Windows simulation mode | **Demonstrated** | Produces changing readings without GPIO hardware |
 | Ultrasonic-sensor GPIO acquisition | **Implemented, not recently hardware-validated** | Requires a compatible Raspberry Pi and safe wiring |
 | Automated test suite | **Implemented** | 13 software-only JUnit/Spring MVC tests for simulation, provider selection, and API behavior |
-| Modern dependencies and production security | **Planned** | See [ROADMAP.md](ROADMAP.md) |
+| Modern dependenes and production security | **Planned** | See [ROADMAP.md](ROADMAP.md) |
 
 The local Windows demonstration was run using **Eclipse Temurin JDK 8** and **Apache Maven 3.9.16**. The application started with `mvn spring-boot:run`; the demo login, Home page, graph, and `/run` response were observed in the browser. These results do **not** establish that physical sensor acquisition works on current Raspberry Pi hardware.
 
@@ -70,7 +70,7 @@ The plotted data above is **simulated**. It is not a recording of a physical ult
 | API payload | JSON |
 | Current verified development environment | Windows, Eclipse Temurin JDK 8, Maven 3.9.16 |
 
-These are **existing implementation choices**, not recommended versions for new production systems. In particular, the Spring Boot and frontend dependencies are old and should be reviewed and modernized. CanvasJS and other third-party libraries remain subject to their own licenses.
+These are **existing implementation choices**, not recommended versions for new production systems. In particular, the Spring Boot and frontend dependenes are old and should be reviewed and modernized. CanvasJS and other third-party libraries remain subject to their own licenses.
 
 ## How it works
 
@@ -97,7 +97,7 @@ PiPlot supports two measurement paths feeding the same web interface.
                               Distance-versus-time chart
 ```
 
-- **Simulation:** `SimulationDistanceProvider` generates readings around 20 cm, varying approximately from 10 to 30 cm, rounded to two decimal places. Its clock can be injected for deterministic tests. Selecting simulation does not initialize Raspberry Pi GPIO.
+- **Simulation:** `SimulationDistanceProvider` generates readings around 20 cm, varying approximately from 10 to 30 cm, rounded to two demal places. Its clock can be injected for deterministic tests. Selecting simulation does not initialize Raspberry Pi GPIO.
 - **Hardware mode:** `HardwareDistanceProvider` contains the existing ultrasonic trigger/echo acquisition logic. Physical timing, timeout handling, and GPIO lifecycle still need improvement and hardware validation.
 - **Frontend:** the graph requests `GET /run` periodically (currently about once per second), reads the returned measurement, and plots a window of recent points against time.
 
@@ -111,7 +111,7 @@ This is the **recommended demonstration path**, because it does not require Rasp
 - **Java JDK 8** (the tested environment used Eclipse Temurin 8)
 - **Apache Maven 3.9.16** (the tested version; another compatible Maven 3.9.x release may also work)
 - Git and a modern web browser
-- Internet access to resolve Maven dependencies and the browser-hosted chart scripts on first use
+- Internet access to resolve Maven dependenes and the browser-hosted chart scripts on first use
 
 Verify that Java and Maven are available in your terminal:
 
@@ -242,7 +242,7 @@ However, the legacy hardware implementation still has known issues, including un
 
 ```text
 PiPlot/
-├── .github/workflows/java-ci.yml
+├── .github/workflows/java-.yml
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -269,17 +269,17 @@ PiPlot/
             SimulationDistanceProviderTest}.java
 ```
 
-The Maven-generated `target/` directory and IDE-specific files are excluded using `.gitignore`.
+The Maven-generated `target/` directory and IDE-spefic files are excluded using `.gitignore`.
 
 ## Known limitations
 
-- **Legacy dependencies:** Spring Boot 1.5.6 and several manually pinned Spring/Tomcat/JavaScript dependencies are outdated. They need a compatibility and security review.
+- **Legacy dependenes:** Spring Boot 1.5.6 and several manually pinned Spring/Tomcat/JavaScript dependenes are outdated. They need a compatibility and security review.
 - **GPIO reliability:** the hardware path currently provisions and shuts down GPIO resources on each measurement; waiting for echo transitions has no timeout, and the current trigger delay is not a correct microsecond pulse.
 - **Blocking hardware measurement:** the physical sensor path sleeps and polls synchronously; request performance and concurrent access are not yet robust.
 - **Web UI:** the pages use older frontend libraries, duplicate jQuery references, and some HTTP-based script sources; error handling, dependency loading, and chart licensing deserve review.
 - **Demonstration login:** the single account is not session-based authentication and does not protect routes.
 - **API contract:** measurement JSON uses a nested array instead of a named measurement object; a future version could expose timestamp, unit, source, and error information.
-- **Automated checks:** 13 software-only regression tests are included. Java 8 CI is configured; a green run must be verified in GitHub Actions, and hardware-dependent tests remain future work.
+- **Automated checks:** 13 software-only regression tests are included. Java 8 CI is configured; Hardware-dependent tests remain future work.
 - **Platform coverage:** Windows simulation has been demonstrated; current Raspberry Pi hardware operation has not been verified.
 
 ## Development roadmap
