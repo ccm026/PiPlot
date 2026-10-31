@@ -33,7 +33,7 @@ The application also includes a **Windows simulation mode**. This generates samp
 | JSON measurement endpoint (`GET /run`) | **Demonstrated** | Returns a nested numeric measurement array |
 | Windows simulation mode | **Demonstrated** | Produces changing readings without GPIO hardware |
 | Ultrasonic-sensor GPIO acquisition | **Implemented, not recently hardware-validated** | Requires a compatible Raspberry Pi and safe wiring |
-| Automated test suite | **Not yet implemented** | Maven's test phase can complete even when no project tests are present |
+| Automated test suite | **Implemented** | 13 software-only JUnit/Spring MVC tests for simulation, provider selection, and API behavior |
 | Modern dependencies and production security | **Planned** | See [ROADMAP.md](ROADMAP.md) |
 
 The local Windows demonstration was run using **Eclipse Temurin JDK 8** and **Apache Maven 3.9.16**. The application started with `mvn spring-boot:run`; the demo login, Home page, graph, and `/run` response were observed in the browser. These results do **not** establish that physical sensor acquisition works on current Raspberry Pi hardware.
@@ -97,8 +97,8 @@ PiPlot supports two measurement paths feeding the same web interface.
                               Distance-versus-time chart
 ```
 
-- **Simulation:** the controller generates changing values around 20 cm, varying approximately from 10 to 30 cm, and rounds them to two decimal places. It does not initialize native Raspberry Pi GPIO when simulation is selected.
-- **Hardware mode:** the controller is intended to pulse an ultrasonic sensor's trigger pin, time the echo pulse, and convert its duration into an estimated distance in centimeters. Hardware timing, timeout handling, and GPIO lifecycle still need improvement.
+- **Simulation:** `SimulationDistanceProvider` generates readings around 20 cm, varying approximately from 10 to 30 cm, rounded to two decimal places. Its clock can be injected for deterministic tests. Selecting simulation does not initialize Raspberry Pi GPIO.
+- **Hardware mode:** `HardwareDistanceProvider` contains the existing ultrasonic trigger/echo acquisition logic. Physical timing, timeout handling, and GPIO lifecycle still need improvement and hardware validation.
 - **Frontend:** the graph requests `GET /run` periodically (currently about once per second), reads the returned measurement, and plots a window of recent points against time.
 
 ## Getting started on Windows
@@ -149,13 +149,12 @@ For a strictly local-only demonstration, you can additionally set `server.addres
 From the repository root (where `pom.xml` is located), run:
 
 ```bash
-mvn -U clean test
-mvn clean package
+mvn -U clean verify
 ```
 
 `-U` rechecks dependency metadata if Maven previously cached an unresolved version. The project previously used an unavailable `pi4j-core:1.2-SNAPSHOT` dependency; it has been changed to the published **Pi4J `1.2`** release.
 
-> **Testing note:** A successful Maven test phase does not mean a project-level automated test suite exists. Automated regression tests are still planned.
+> **Testing:** The project has 13 software-only JUnit/Spring MVC tests covering known simulation values, provider selection, `/run` success JSON, error responses, and JSP view mapping. The GitHub Actions Java 8 workflow is configured to run `mvn clean verify`; check the Actions tab for its actual status.
 
 ### 4. Start the application
 
@@ -214,7 +213,7 @@ A future version could support multiple accounts through proper password hashing
 }
 ```
 
-The array is nested: `measuredData` contains an array whose first element contains one numeric reading in centimeters. This format is retained for compatibility with the existing graph. The most recent Git commit also addresses integer parsing in the graph; further validation of fractional readings and malformed responses is planned.
+The array is nested: `measuredData` contains an array whose first element contains one numeric reading in centimeters. This format is retained for compatibility with the existing graph. For an unavailable, negative, or non-finite reading, `/run` returns HTTP `503` and `{"error":"measurement_unavailable"}`. The legacy JSP graph may need improved handling of that error response. The most recent Git commit also addresses integer parsing in the graph; further validation of fractional readings and malformed responses is planned.
 
 The `/run` endpoint can be called independently of the login page because the login is only a demonstration.
 
@@ -243,31 +242,32 @@ However, the legacy hardware implementation still has known issues, including un
 
 ```text
 PiPlot/
+├── .github/workflows/java-ci.yml
 ├── .gitignore
 ├── LICENSE
 ├── README.md
-├── ROADMAP.md                  # Planned development work
+├── ROADMAP.md
+├── docs/CC_CLI_REWORK.md
 ├── pom.xml
 ├── screenshots/
 │   ├── login.PNG
 │   ├── home.PNG
 │   └── simulation-graph.PNG
-└── src/main/
-    ├── java/com/piproject/main/
-    │   ├── Application.java
-    │   ├── Controller/
-    │   │   ├── DistanceController.java
-    │   │   ├── LoginController.java
-    │   │   └── User.java
-    │   └── webinit/
-    │       ├── RootConfig.java
-    │       ├── Webconfig.java
-    │       └── Webinit.java
-    ├── resources/application.properties
-    └── webapp/WEB-INF/
-        ├── login.jsp
-        ├── home.jsp
-        └── graph.jsp
+└── src/
+    ├── main/
+    │   ├── java/com/piproject/main/
+    │   │   ├── Application.java
+    │   │   ├── Controller/{DistanceController,LoginController,User}.java
+    │   │   ├── measurement/{DistanceProvider,DistanceProviderConfiguration,
+    │   │   │   HardwareDistanceProvider,SimulationDistanceProvider,
+    │   │   │   MeasurementUnavailableException}.java
+    │   │   └── webinit/{RootConfig,Webconfig,Webinit}.java
+    │   ├── resources/application.properties
+    │   └── webapp/WEB-INF/{login,home,graph}.jsp
+    └── test/java/com/piproject/main/
+        ├── Controller/DistanceControllerTest.java
+        └── measurement/{DistanceProviderConfigurationTest,
+            SimulationDistanceProviderTest}.java
 ```
 
 The Maven-generated `target/` directory and IDE-specific files are excluded using `.gitignore`.
@@ -280,14 +280,14 @@ The Maven-generated `target/` directory and IDE-specific files are excluded usin
 - **Web UI:** the pages use older frontend libraries, duplicate jQuery references, and some HTTP-based script sources; error handling, dependency loading, and chart licensing deserve review.
 - **Demonstration login:** the single account is not session-based authentication and does not protect routes.
 - **API contract:** measurement JSON uses a nested array instead of a named measurement object; a future version could expose timestamp, unit, source, and error information.
-- **Automated checks:** no project-level regression test suite or CI workflow was present in the last inspected source archive.
+- **Automated checks:** 13 software-only regression tests are included. Java 8 CI is configured; a green run must be verified in GitHub Actions, and hardware-dependent tests remain future work.
 - **Platform coverage:** Windows simulation has been demonstrated; current Raspberry Pi hardware operation has not been verified.
 
 ## Development roadmap
 
 A detailed work plan with scope, acceptance criteria, and estimated remaining development time is in **[ROADMAP.md](ROADMAP.md)**.
 
-The roadmap intentionally **does not count** work already completed, including environment setup, the stable Pi4J dependency fix, initial Windows simulation, and the integer-parsing change. The planned tasks focus on hardware reliability, architecture, frontend resilience, automated testing, dependency modernization, and documentation.
+The roadmap does not count completed work, including the Java environment, stable Pi4J dependency, Windows simulation, integer parsing, extraction of the measurement providers, or the initial 13 regression tests. Remaining tasks focus on hardware reliability, frontend resilience, expanded regression coverage, dependency modernization, and documentation.
 
 ## Background and license
 

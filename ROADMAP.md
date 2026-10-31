@@ -1,7 +1,7 @@
 # PiPlot Development Roadmap
 
 **Status:** Proposed, genuine future work for a personally maintained project  
-**Last updated:** 2026-10-28  
+**Last updated:** 2026-10-31  
 **Repository:** https://github.com/ccm026/PiPlot
 
 ## Purpose
@@ -17,6 +17,8 @@ This roadmap records work **not yet completed**. Estimates are planning ranges, 
 - Established Java 8 / Maven 3.9.16 build environment on Windows.
 - Replaced unavailable Pi4J `1.2-SNAPSHOT` with stable `1.2`.
 - Added configurable Windows simulation mode (`piplot.simulation=true`) that avoids native GPIO initialization during simulation.
+- Separated simulation and hardware measurement providers and introduced a 13-test Java regression suite; verified locally on Java 8.
+- Added Java 8 GitHub Actions workflow; CI success is not yet claimed until the remote run is green.
 - Demonstrated the existing login page, Home page, live graph, and `/run` JSON endpoint in a browser.
 - Corrected integer parsing in the graph in a later commit; further numerical/error-case validation remains useful.
 - Added screenshots of the working demonstration.
@@ -26,12 +28,12 @@ This roadmap records work **not yet completed**. Estimates are planning ranges, 
 | ID | Workstream | Estimated remaining effort | Priority | Status |
 | --- | --- | ---: | --- | --- |
 | PP-01 | Stabilize GPIO acquisition and sensor fault handling | 6–9 h | High | Planned |
-| PP-02 | Separate measurement providers from web controllers | 5–8 h | High | Planned |
+| PP-02 | Separate measurement providers from web controllers | Completed (not counted) | High | Implemented; hardware unvalidated |
 | PP-03 | Improve plotting, polling, and API error handling | 4–6 h | High | Planned |
-| PP-04 | Implement meaningful automated regression tests | 5–8 h | High | Planned |
+| PP-04 | Expand automated regression tests | 3–5 h | High | 13 software-only tests added; more work planned |
 | PP-05 | Review and modernize legacy dependencies | 6–10 h | Medium | Planned |
-| PP-06 | Add CI, reproducible setup, and hardware documentation | 3–5 h | Medium | Planned |
-| **Total** | **Estimated future work** | **29–46 h** | | |
+| PP-06 | Improve CI reliability and hardware documentation | 2–4 h | Medium | Workflow added, green CI run pending |
+| **Total** | **Estimated remaining work** | **21–34 h** | | |
 
 > **Planning caution:** Some tasks may overlap and estimates can change after investigation. Do not claim the full range as completed, and do not create artificial tasks merely to reach a target number of hours. The scope and actual work should remain genuine.
 
@@ -64,13 +66,13 @@ The physical measurement path currently provisions GPIO during each request, wai
 
 ## PP-02 — Separate measurement providers from web controllers
 
-**Estimate:** 5–8 hours  
+**Status:** Completed for the software-only rework (not included in remaining-hour estimates)  
 **Priority:** High  
 **Area:** Controller and service architecture
 
 ### Problem
 
-The current HTTP controller contains both GPIO-specific logic and simulation logic. That makes error handling, resource ownership, platform support, and testing difficult to maintain.
+Originally, the HTTP controller combined GPIO-specific logic and simulation logic. This software rework extracted them into `HardwareDistanceProvider` and `SimulationDistanceProvider`, selected by `DistanceProviderConfiguration`. Physical GPIO reliability remains unvalidated.
 
 ### Planned work
 
@@ -116,13 +118,13 @@ The chart demonstrates successful simulated updates, but frontend handling remai
 
 ## PP-04 — Implement meaningful automated regression tests
 
-**Estimate:** 5–8 hours  
+**Estimate:** 3–5 hours remaining  
 **Priority:** High  
 **Area:** `src/test/` and build verification
 
 ### Problem
 
-The application has been built and demonstrated manually, but no meaningful project-level automated regression suite was present in the last inspected source archive. A successful `mvn test` phase alone is not evidence of test coverage.
+A 13-test software-only suite now covers deterministic simulation values, provider selection, successful JSON responses, negative and invalid measurements, provider unavailability, and JSP view mapping. Remaining work includes more edge conditions and frontend/error regressions; a green GitHub CI run is also required.
 
 ### Planned work
 
@@ -166,17 +168,17 @@ The project uses Spring Boot 1.5.6 and manually pinned dependencies from differe
 
 ## PP-06 — Add CI, reproducible setup, and hardware documentation
 
-**Estimate:** 3–5 hours  
+**Estimate:** 2–4 hours remaining  
 **Priority:** Medium  
 **Area:** `.github/workflows/`, README, `docs/`
 
 ### Problem
 
-The application has been demonstrated on one Windows development environment. New contributors and reviewers would benefit from a repeatable build, automated checks, clearer troubleshooting, and safe hardware documentation.
+The application has a documented Windows simulation setup and an initial Java 8 GitHub Actions workflow, but CI needs a confirmed green run and broader reproducibility and hardware documentation remain future work.
 
 ### Planned work
 
-- Create a GitHub Actions Maven workflow after the software-only tests are ready.
+- Verify GitHub Actions runs Maven `clean verify` on Java 8, and address any Linux-only dependency or CI configuration failures.
 - Record tested Java/Maven versions and known limitations of JSP packaging.
 - Document Raspberry Pi GPIO logical pin mapping versus physical header pin numbers.
 - Include sensor voltage-level precautions, required hardware, and a troubleshooting guide.
@@ -193,12 +195,12 @@ The application has been demonstrated on one Windows development environment. Ne
 
 ## Proposed work order
 
-1. **PP-02:** establish the source interface so simulation and hardware can be changed safely.
-2. **PP-01:** fix hardware timing, lifecycle, and bounded failure handling.
-3. **PP-04:** add tests alongside the refactoring rather than leaving verification until the end.
-4. **PP-03:** improve frontend behavior and measurement API resilience.
-5. **PP-05:** modernize dependencies incrementally after baseline behavior is protected by tests.
-6. **PP-06:** finish CI, reproducibility, and hardware documentation as the implementation evolves.
+1. **PP-02 is completed** for the software-only rework; physical GPIO behavior is not validated.
+2. **PP-06:** obtain a green GitHub Actions Java 8 verification run and finish reproducibility notes.
+3. **PP-04:** extend tests beyond the initial software-only 13-test suite.
+4. **PP-01:** fix hardware timing, lifecycle, and bounded failure handling when suitable hardware is available.
+5. **PP-03:** improve frontend behavior and measurement API resilience.
+6. **PP-05:** modernize dependencies incrementally after baseline behavior is protected by tests.
 
 Some workstreams will overlap. The order is guidance, not a requirement to finish each one before starting the next.
 
