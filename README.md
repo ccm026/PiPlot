@@ -247,7 +247,6 @@ PiPlot/
 ├── LICENSE
 ├── README.md
 ├── ROADMAP.md
-├── docs/CC_CLI_REWORK.md
 ├── pom.xml
 ├── screenshots/
 │   ├── login.PNG
