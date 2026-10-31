@@ -13,33 +13,31 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 /** Exercises Spring MVC routing/response shape without a running server or GPIO. */
 public class DistanceControllerTest {
     private MockMvc client(DistanceProvider provider) {
+        InternalResourceViewResolver jspResolver = new InternalResourceViewResolver();
+        jspResolver.setPrefix("/WEB-INF/");
+        jspResolver.setSuffix(".jsp");
 
-    InternalResourceViewResolver jspResolver =
-            new InternalResourceViewResolver();
-
-    jspResolver.setPrefix("/WEB-INF/");
-    jspResolver.setSuffix(".jsp");
-
-    return MockMvcBuilders
-            .standaloneSetup(new DistanceController(provider))
-            .setViewResolvers(jspResolver)
-            .build();
-	}
+        return MockMvcBuilders
+                .standaloneSetup(new DistanceController(provider))
+                .setViewResolvers(jspResolver)
+                .build();
+    }
 
     @Test
     public void runReturnsNestedMeasurementJson() throws Exception {
-        client(() -> 20.0)
-            .perform(get("/graph"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("graph"))
-            .andExpect(forwardedUrl("/WEB-INF/graph.jsp"));
+        client(() -> 20.25)
+                .perform(get("/run"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.measuredData[0][0]").value(20.25));
     }
 
     @Test
     public void graphStillResolvesOriginalJspViewName() throws Exception {
         client(() -> 20.0).perform(get("/graph"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("graph"));
+                .andExpect(view().name("graph"))
+                .andExpect(forwardedUrl("/WEB-INF/graph.jsp"));
     }
 
     @Test
